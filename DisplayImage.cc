@@ -3,6 +3,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <stdio.h>
+// #include "Quadtree.h"
 
 using namespace std;
 using namespace cv;
@@ -10,12 +11,82 @@ using namespace cv;
 /// Global Variables
 const int DELAY = 5;
 
-const int window_width = 900;
-const int window_height = 900;
-int x_1 = -window_width / 2;
-int x_2 = window_width * 3 / 2;
-int y_1 = -window_width / 2;
-int y_2 = window_width * 3 / 2;
+const int window_width = 1024;
+const int window_height = 1024;
+
+int x_1 = 0;
+int x_2 = window_width;
+int y_1 = 0;
+int y_2 = window_height;
+int x = window_width / 2;
+int y = window_height / 2;
+int size = 50;
+int delta = 0;
+int step = 25;
+double wordsize = 3;
+int lineType = 2;
+int dx[4] = {0,1,0,-1};
+int dy[4] = {1,0,-1,0};
+int number;
+string word[100];
+Mat textImg;
+int testcount;
+
+class Quadtree{
+public:
+  Quadtree(float _x, float _y, float _width, float _height, int _level, int _maxLevel);
+  // ~Quadtree();
+  
+  float x;
+  float y;
+  float width;
+  float height;
+  int level;
+  int maxLevel;
+  int colored;
+  // vector<Object*>       objects;
+
+  Quadtree * parent;
+  Quadtree * NW;
+  Quadtree * NE;
+  Quadtree * SW;
+  Quadtree * SE;
+
+  void Add(Quadtree qtree);
+  // sf::RectangleShape shape;
+  // sf::Text text;
+  // bool contains(Quadtree *child, Object *object);
+};
+
+Quadtree::Quadtree(float _x, float _y, float _width, float _height, int _level, int _maxLevel){
+  x = _x;
+  y = _y;
+  width = _width;
+  height = _height;
+  level = _level;
+  maxLevel = _maxLevel;
+  colored = 1;
+  
+  if (level == maxLevel) {
+    return;
+  }
+  
+  NW = new Quadtree(x, y, width / 2, height / 2, level+1, maxLevel);
+  NE = new Quadtree(x + width / 2, y, width / 2, height / 2, level+1, maxLevel);
+  SW = new Quadtree(x, y + height / 2, width / 2, height / 2, level+1, maxLevel);
+  SE = new Quadtree(x + width / 2, y + height / 2, width / 2, height / 2, level+1, maxLevel);
+
+}
+
+void Quadtree::Add(Quadtree qtree){
+  if(qtree.level==qtree.maxLevel){
+    if(textImg.at<int>(qtree.x,qtree.y)!=0)
+      qtree.colored = 2;
+    return;
+  }
+  Add(qtree->NW);
+  // Add(qtree.NE);
+}
 
 static Scalar randomColor( RNG& rng ) {
   int icolor = (unsigned) rng;
@@ -26,7 +97,7 @@ static bool randomBool (){
 }
 
 void rotate(Mat& src, double angle, Mat& dst) {
-    int len = std::max(src.cols, src.rows);
+    int len = max(src.cols, src.rows);
     Point2f pt(len/2., len/2.);
     Mat r = getRotationMatrix2D(pt, angle, 1.0);
 
@@ -34,26 +105,45 @@ void rotate(Mat& src, double angle, Mat& dst) {
 }
 
 int Displaying_Random_Text( Mat image, char* window_name, RNG rng ) {
-  int lineType = 8,NUMBER = 10;
+
   bool judge;
   freopen("t.in","r",stdin);
-  cin>>NUMBER;
-  for ( int i = 1; i <= NUMBER; ++i ) {
-    Point org;
-    org.x = rng.uniform(x_1, x_2);
-    org.y = rng.uniform(y_1, y_2);
+  cin>>number;
+  
+  Point org;
+  org.x = x;
+  org.y = y;
 
+  Quadtree qtree(0,0,16,16,1,1);
+//???????????????????????????????????????????????????????????????????????????
+  qtree.Add(qtree);
+//???????????????????????????????????????????????????????????????????????????
+  
+  for(int i=1;i<=number;++i){
+    cin>>word[i];
+  }
+
+  for ( int i = 1; i <= number; ++i ) {
+    
+    if(i%2) delta = delta + step;
+
+    org.x+=delta*dx[i%4];
+    org.y+=delta*dy[i%4];
+    
     judge = randomBool();
-
-    string word;
-    cin>>word;
-    Mat textImg = Mat::zeros(image.rows,image.cols,image.type());
-    putText( textImg, word, org, rng.uniform(0, 8),
-             rng.uniform(0, 100) * 0.05 + 0.1, randomColor(rng), rng.uniform(1, 10), lineType);
+    textImg = Mat::zeros(image.rows,image.cols,image.type());
+    putText( textImg, word[i], org, 2,
+             wordsize, randomColor(rng), CV_FONT_HERSHEY_SCRIPT_SIMPLEX, lineType);
     
     if(judge) rotate(textImg,90,textImg);
-    image = image + textImg;
 
+    // if(qtree.Judge(*qtree,textImg))
+      image = image + textImg;
+
+    if(randomBool()){
+      wordsize-=0.1;
+      // lineType--;
+    }
 
     imshow( window_name, image );
     if ( waitKey(DELAY) >= 0 )
@@ -83,6 +173,6 @@ int main() {
   c = Displaying_Random_Text( image, window_name, rng );
   // if( c != 0 ) return 0;
 
-  waitKey( 0 );
+  waitKey(0);
   return 0;
 }
