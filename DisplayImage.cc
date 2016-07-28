@@ -22,7 +22,7 @@ int y = window_height / 2;
 int size = 50;
 int dta = 0;
 int step = 10;
-double wordsize = 1.6;
+double wordsize = 1.8;
 int lineType = 8;
 int dx[4] = {0, 1, 0, -1};
 int dy[4] = {1, 0, -1, 0};
@@ -159,7 +159,10 @@ int Displaying_Random_Text( Mat image, char* window_name, RNG rng ) {
         textImg = Mat::zeros(image.rows, image.cols, image.type());
 
         putText( textImg, word[j], org, 2,
-                 wordsize, randomColor(rng), CV_FONT_HERSHEY_PLAIN, lineType);
+                 wordsize, randomColor(rng), 2 , lineType);
+
+    // putText( image, "Testing text rendering", org, rng.uniform(0,8),
+             // rng.uniform(0,100)*0.05+0.1, randomColor(rng), rng.uniform(1, 10), lineType);
 
         if (judge) rotate(textImg, 90, textImg);
 
@@ -181,8 +184,8 @@ int Displaying_Random_Text( Mat image, char* window_name, RNG rng ) {
       if ( waitKey(DELAY) >= 0 ) { return -1; }
     }
     if (randomBool(5)) {
-      if (wordsize > 0.6)
-        wordsize -= 0.05;
+      if (wordsize > 0.8)
+        wordsize -= 0.1;
       // if (step > 3)
       //   step--;
       // lineType--;
