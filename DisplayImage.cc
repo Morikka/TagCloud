@@ -9,7 +9,6 @@ using namespace cv;
 
 /// Global Variables
 const int DELAY = 5;
-
 const int window_width = 512;
 const int window_height = 512;
 const int Try = 68;
@@ -24,7 +23,7 @@ int size = 50;
 int dta = 0;
 int step = 10;
 double wordsize = 1.6;
-int lineType = 1;
+int lineType = 8;
 int dx[4] = {0, 1, 0, -1};
 int dy[4] = {1, 0, -1, 0};
 
@@ -182,7 +181,7 @@ int Displaying_Random_Text( Mat image, char* window_name, RNG rng ) {
       if ( waitKey(DELAY) >= 0 ) { return -1; }
     }
     if (randomBool(5)) {
-      if (wordsize > 0.5)
+      if (wordsize > 0.6)
         wordsize -= 0.05;
       // if (step > 3)
       //   step--;
